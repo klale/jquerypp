@@ -1,13 +1,15 @@
-/*
-* jQuery++ - 1.0.0 (2012-11-23)
+/*!
+* jQuery++ - 1.0.1 (2013-02-08)
 * http://jquerypp.com
-* Copyright (c) 2012 Bitovi
+* Copyright (c) 2013 Bitovi
 * Licensed MIT
 */
+
 define(['jquery'], function($) {
 
-    var jQuery = $;
+    var jQuery = $;    
 
+(function (window, $, undefined) {
 	// ## jquery/dom/styles/styles.js
 	var getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
 		// The following variables are used to convert camelcased attribute names
@@ -48,7 +50,7 @@ define(['jquery'], function($) {
 			oldName = name.replace(rdashAlpha, fcamelCase);
 
 			if (rfloat.test(name)) {
-				name = jQuery.support.cssFloat ? "float" : "styleFloat";
+				name = $.support.cssFloat ? "float" : "styleFloat";
 				oldName = "cssFloat";
 			}
 
@@ -293,7 +295,7 @@ define(['jquery'], function($) {
 			return oldanimate.apply(this, arguments);
 		}
 
-		var optall = jQuery.speed(speed, easing, callback);
+		var optall = $.speed(speed, easing, callback);
 
 		// Add everything to the animation queue
 		this.queue(optall.queue, function (done) {
@@ -402,7 +404,7 @@ define(['jquery'], function($) {
 
 	// ## jquery/dom/compare/compare.js
 	// See http://ejohn.org/blog/comparing-document-position/
-	jQuery.fn.compare = function (element) { //usually 
+	$.fn.compare = function (element) { //usually
 		try {
 			// Firefox 3 throws an error with XUL - we can't use compare then
 			element = element.jquery ? element[0] : element;
@@ -583,7 +585,7 @@ define(['jquery'], function($) {
 
 	// ## jquery/dom/cookie/cookie.js
 
-	jQuery.cookie = function (name, value, options) {
+	$.cookie = function (name, value, options) {
 		if (typeof value != 'undefined') {
 			// name and value given, set cookie
 			options = options || {};
@@ -592,8 +594,8 @@ define(['jquery'], function($) {
 				options.expires = -1;
 			}
 			// convert value to JSON string
-			if (typeof value == 'object' && jQuery.toJSON) {
-				value = jQuery.toJSON(value);
+			if (typeof value == 'object' && $.toJSON) {
+				value = $.toJSON(value);
 			}
 			var expires = '';
 			// Set expiry
@@ -622,7 +624,7 @@ define(['jquery'], function($) {
 			if (document.cookie && document.cookie != '') {
 				var cookies = document.cookie.split(';');
 				for (var i = 0; i < cookies.length; i++) {
-					var cookie = jQuery.trim(cookies[i]);
+					var cookie = $.trim(cookies[i]);
 					// Does this cookie string begin with the name we want?
 					if (cookie.substring(0, name.length + 1) == (name + '=')) {
 						// Get the cookie value
@@ -632,9 +634,9 @@ define(['jquery'], function($) {
 				}
 			}
 			// Parse JSON from the cookie into an object
-			if (jQuery.evalJSON && cookieValue && cookieValue.match(/^\s*\{/)) {
+			if ($.evalJSON && cookieValue && cookieValue.match(/^\s*\{/)) {
 				try {
-					cookieValue = jQuery.evalJSON(cookieValue);
+					cookieValue = $.evalJSON(cookieValue);
 				}
 				catch (e) {}
 			}
@@ -1399,23 +1401,37 @@ define(['jquery'], function($) {
 		getNextTextNode = iteratorMaker("firstChild", "nextSibling"),
 		getPrevTextNode = iteratorMaker("lastChild", "previousSibling"),
 		callMove = function (container, offset, howMany) {
-			if (isText(container)) {
-				return move(container, offset + howMany)
+			var mover = howMany < 0 ? getPrevTextNode : getNextTextNode;
+
+			// find the text element
+			if (!isText(container)) {
+				// sometimes offset isn't actually an element
+				container = container.childNodes[offset] ? container.childNodes[offset] :
+				// if this happens, use the last child
+				container.lastChild;
+
+				if (!isText(container)) {
+					container = mover(container)
+				}
+				return move(container, howMany)
 			} else {
-				return container.childNodes[offset] ? move(container.childNodes[offset], howMany) : move(container.lastChild, howMany, true)
-				return
+				if (offset + howMany < 0) {
+					return move(mover(container), offset + howMany)
+				} else {
+					return move(container, offset + howMany)
+				}
+
 			}
 		},
+		// Moves howMany characters from the start of
+		// from
 		move = function (from, howMany) {
 			var mover = howMany < 0 ? getPrevTextNode : getNextTextNode;
 
 			howMany = Math.abs(howMany);
 
-			if (!isText(from)) {
-				from = mover(from)
-			}
 			while (from && howMany >= from.nodeValue.length) {
-				hasMany = howMany - from.nodeValue.length;
+				howMany = howMany - from.nodeValue.length;
 				from = mover(from)
 			}
 			return {
@@ -1696,7 +1712,7 @@ define(['jquery'], function($) {
 			}
 
 			// uses either the cached offset or .offset()
-			var offset = useOffsetCache ? jQuery.data(this, "offsetCache") || jQuery.data(this, "offsetCache", q.offset()) : q.offset();
+			var offset = useOffsetCache ? $.data(this, "offsetCache") || $.data(this, "offsetCache", q.offset()) : q.offset();
 
 			// Check if the given coordinates are within the area of the current element
 			var res = withinBox(left, top, offset.left, offset.top, this.offsetWidth, this.offsetHeight);
@@ -1707,7 +1723,7 @@ define(['jquery'], function($) {
 			}
 		});
 
-		return this.pushStack(jQuery.unique(ret), "within", left + "," + top);
+		return this.pushStack($.unique(ret), "within", left + "," + top);
 	}
 
 	$.fn.withinBox = function (left, top, width, height, useOffsetCache) {
@@ -1718,7 +1734,7 @@ define(['jquery'], function($) {
 			if (this == document.documentElement) return ret.push(this);
 
 			// use cached offset or .offset()
-			var offset = useOffsetCache ? jQuery.data(this, "offset") || jQuery.data(this, "offset", q.offset()) : q.offset();
+			var offset = useOffsetCache ? $.data(this, "offset") || $.data(this, "offset", q.offset()) : q.offset();
 
 			var ew = q.width(),
 				eh = q.height(),
@@ -1727,7 +1743,7 @@ define(['jquery'], function($) {
 
 			if (res) ret.push(this);
 		});
-		return this.pushStack(jQuery.unique(ret), "withinBox", jQuery.makeArray(arguments).join(","));
+		return this.pushStack($.unique(ret), "withinBox", $.makeArray(arguments).join(","));
 	}
 
 	// ## jquery/event/default/default.js
@@ -1784,11 +1800,11 @@ define(['jquery'], function($) {
 			// Caller can pass in an Event, Object, or just an event type string
 			event = typeof event === "object" ?
 			// jQuery.Event object
-			event[jQuery.expando] ? event :
+			event[$.expando] ? event :
 			// Object literal
-			new jQuery.Event(type, event) :
+			new $.Event(type, event) :
 			// Just the event type (string)
-			new jQuery.Event(type),
+			new $.Event(type),
 			res = oldTrigger.call($.event, event, data, elem, onlyHandlers),
 			paused = event.isPaused && event.isPaused();
 
@@ -1821,7 +1837,7 @@ define(['jquery'], function($) {
 
 
 	// Store the old jQuery.cleanData
-	var oldClean = jQuery.cleanData;
+	var oldClean = $.cleanData;
 
 	// Overwrites cleanData which is called by jQuery on manipulation methods
 	$.cleanData = function (elems) {
@@ -1952,7 +1968,7 @@ define(['jquery'], function($) {
 	};
 
 	// ## jquery/event/livehack/livehack.js
-	var event = jQuery.event,
+	var event = $.event,
 
 		//helper that finds handlers by type and calls back a function, this is basically handle
 		// events - the events object
@@ -2105,7 +2121,8 @@ define(['jquery'], function($) {
 	// ## jquery/event/reverse/reverse.js
 	$.event.reverse = function (name, attributes) {
 		var bound = $(),
-			count = 0;
+			count = 0,
+			dispatch = $.event.handle || $.event.dispatch;
 
 		$.event.special[name] = {
 			setup: function () {
@@ -2144,7 +2161,7 @@ define(['jquery'], function($) {
 						var where = data === false ? ev.target : this
 
 						// trigger all this element's handlers
-						$.event.handle.call(where, ev, data);
+						dispatch.call(where, ev, data);
 						if (ev.isPropagationStopped()) {
 							count--;
 							return;
@@ -2160,7 +2177,7 @@ define(['jquery'], function($) {
 						while (++index < length && (child = bound[index]) && (isWindow || $.contains(where, child))) {
 
 							// call the event
-							$.event.handle.call(child, ev, data);
+							dispatch.call(child, ev, data);
 
 							if (ev.isPropagationStopped()) {
 								// move index until the item is not in the current child
@@ -2190,7 +2207,7 @@ define(['jquery'], function($) {
 		return $.event.special[name];
 	}
 
-	// ## jquery/event/drag/drag.js
+	// ## jquery/event/drag/core/core.js
 	if (!$.event.special.move) {
 		$.event.reverse('move');
 	}
@@ -2621,6 +2638,56 @@ define(['jquery'], function($) {
 		$.Drag.mousedown.call($.Drag, e, this);
 	});
 
+	// ## jquery/event/drag/step/step.js
+	var round = function (x, m) {
+		return Math.round(x / m) * m;
+	}
+
+	$.Drag.prototype.
+
+	step = function (amount, container, center) {
+		//on draws ... make sure this happens
+		if (typeof amount == 'number') {
+			amount = {
+				x: amount,
+				y: amount
+			}
+		}
+		container = container || $(document.body);
+		this._step = amount;
+
+		var styles = container.styles("borderTopWidth", "paddingTop", "borderLeftWidth", "paddingLeft");
+		var top = parseInt(styles.borderTopWidth) + parseInt(styles.paddingTop),
+			left = parseInt(styles.borderLeftWidth) + parseInt(styles.paddingLeft);
+
+		this._step.offset = container.offsetv().plus(left, top);
+		this._step.center = center;
+		return this;
+	};
+
+	(function () {
+		var oldPosition = $.Drag.prototype.position;
+		$.Drag.prototype.position = function (offsetPositionv) {
+			//adjust required_css_position accordingly
+			if (this._step) {
+				var step = this._step,
+					center = step.center && step.center.toLowerCase(),
+					movingSize = this.movingElement.dimensionsv('outer'),
+					lot = step.offset.top() - (center && center != 'x' ? movingSize.height() / 2 : 0),
+					lof = step.offset.left() - (center && center != 'y' ? movingSize.width() / 2 : 0);
+
+				if (this._step.x) {
+					offsetPositionv.left(Math.round(lof + round(offsetPositionv.left() - lof, this._step.x)))
+				}
+				if (this._step.y) {
+					offsetPositionv.top(Math.round(lot + round(offsetPositionv.top() - lot, this._step.y)))
+				}
+			}
+
+			oldPosition.call(this, offsetPositionv)
+		}
+	})();
+
 	// ## jquery/event/drag/limit/limit.js
 	$.Drag.prototype
 
@@ -2693,7 +2760,7 @@ define(['jquery'], function($) {
 
 
 	$.Drop = function (callbacks, element) {
-		jQuery.extend(this, callbacks);
+		$.extend(this, callbacks);
 		this.element = $(element);
 	}
 	// add the elements ...
@@ -3087,56 +3154,7 @@ define(['jquery'], function($) {
 		}
 	})
 
-	// ## jquery/event/drag/step/step.js
-	var round = function (x, m) {
-		return Math.round(x / m) * m;
-	}
-
-	$.Drag.prototype.
-
-	step = function (amount, container, center) {
-		//on draws ... make sure this happens
-		if (typeof amount == 'number') {
-			amount = {
-				x: amount,
-				y: amount
-			}
-		}
-		container = container || $(document.body);
-		this._step = amount;
-
-		var styles = container.styles("borderTopWidth", "paddingTop", "borderLeftWidth", "paddingLeft");
-		var top = parseInt(styles.borderTopWidth) + parseInt(styles.paddingTop),
-			left = parseInt(styles.borderLeftWidth) + parseInt(styles.paddingLeft);
-
-		this._step.offset = container.offsetv().plus(left, top);
-		this._step.center = center;
-		return this;
-	};
-
-	(function () {
-		var oldPosition = $.Drag.prototype.position;
-		$.Drag.prototype.position = function (offsetPositionv) {
-			//adjust required_css_position accordingly
-			if (this._step) {
-				var step = this._step,
-					center = step.center && step.center.toLowerCase(),
-					movingSize = this.movingElement.dimensionsv('outer'),
-					lot = step.offset.top() - (center && center != 'x' ? movingSize.height() / 2 : 0),
-					lof = step.offset.left() - (center && center != 'y' ? movingSize.width() / 2 : 0);
-
-				if (this._step.x) {
-					offsetPositionv.left(Math.round(lof + round(offsetPositionv.left() - lof, this._step.x)))
-				}
-				if (this._step.y) {
-					offsetPositionv.top(Math.round(lot + round(offsetPositionv.top() - lot, this._step.y)))
-				}
-			}
-
-			oldPosition.call(this, offsetPositionv)
-		}
-	})();
-
+	// ## jquery/event/drag/drag.js
 	// ## jquery/event/fastfix/fastfix.js
 	// http://bitovi.com/blog/2012/04/faster-jquery-event-fix.html
 	// https://gist.github.com/2377196
@@ -3199,10 +3217,10 @@ define(['jquery'], function($) {
 			};
 
 		// Get all properties that should be mapped
-		jQuery.each(jQuery.event.keyHooks.props.concat(jQuery.event.mouseHooks.props).concat(jQuery.event.props), function (i, prop) {
+		$.each($.event.keyHooks.props.concat($.event.mouseHooks.props).concat($.event.props), function (i, prop) {
 			if (prop !== "target") {
 				(function () {
-					Object.defineProperty(jQuery.Event.prototype, prop, {
+					Object.defineProperty($.Event.prototype, prop, {
 						get: function () {
 							// get the original value, undefined when there is no original event
 							var originalValue = this.originalEvent && this.originalEvent[prop];
@@ -3224,13 +3242,13 @@ define(['jquery'], function($) {
 			}
 		});
 
-		jQuery.event.fix = function (event) {
-			if (event[jQuery.expando]) {
+		$.event.fix = function (event) {
+			if (event[$.expando]) {
 				return event;
 			}
 			// Create a jQuery event with at minimum a target and type set
 			var originalEvent = event,
-				event = jQuery.Event(originalEvent);
+				event = $.Event(originalEvent);
 			event.target = originalEvent.target;
 			// Fix target property, if necessary (#1925, IE 6/7/8 & Safari2)
 			if (!event.target) {
@@ -3286,11 +3304,26 @@ define(['jquery'], function($) {
 			// now start checking mousemoves to update location
 			var delegate = ev.delegateTarget || ev.currentTarget;
 			var selector = ev.handleObj.selector;
+			var pending = $.data(delegate, "_hover" + selector);
 			// prevents another mouseenter until current has run its course
-			if ($.data(delegate, "_hover" + selector)) {
+			if (pending) {
+				// Under some  circumstances, mouseleave may never fire
+				// (e.g., the element is removed while hovered)
+				// so if we've entered another element, wait the leave time,
+				// then force it to release.
+				if (!pending.forcing) {
+					pending.forcing = true;
+					clearTimeout(pending.leaveTimer);
+					var leaveTime = pending.leaving ? Math.max(0, pending.hover.leave - (new Date() - pending.leaving)) : pending.hover.leave;
+					var self = this;
+
+					setTimeout(function () {
+						pending.callHoverLeave();
+						onmouseenter.call(self, ev);
+					}, leaveTime);
+				}
 				return;
 			}
-			$.data(delegate, "_hover" + selector, true)
 			var loc = {
 				pageX: ev.pageX,
 				pageY: ev.pageY
@@ -3333,7 +3366,8 @@ define(['jquery'], function($) {
 						} else {
 							clearTimeout(leaveTimer);
 							// leave the hover after the time set in hover.leave(time)
-							leaveTimer = setTimeout(function () {
+							pending.leaving = new Date();
+							leaveTimer = pending.leaveTimer = setTimeout(function () {
 								callHoverLeave();
 							}, hover._leave)
 						}
@@ -3353,6 +3387,11 @@ define(['jquery'], function($) {
 					})
 					hovered = true;
 				};
+			pending = {
+				callHoverLeave: callHoverLeave,
+				hover: hover
+			};
+			$.data(delegate, "_hover" + selector, pending);
 
 			// Bind the mousemove event
 			$(enteredEl).bind("mousemove", mousemove).bind("mouseleave", mouseleave);
@@ -3391,9 +3430,22 @@ define(['jquery'], function($) {
 	"hovermove"], "mouseenter", onmouseenter)
 
 	// ## jquery/event/key/key.js
+
+	// copied from jQuery 1.8.3
+	var uaMatch = function (ua) {
+		ua = ua.toLowerCase();
+
+		var match = /(chrome)[ \/]([\w.]+)/.exec(ua) || /(webkit)[ \/]([\w.]+)/.exec(ua) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) || /(msie) ([\w.]+)/.exec(ua) || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
+
+		return {
+			browser: match[1] || "",
+			version: match[2] || "0"
+		};
+	}
+
 	var keymap = {},
 		reverseKeyMap = {},
-		currentBrowser = jQuery.uaMatch(navigator.userAgent).browser;
+		currentBrowser = uaMatch(navigator.userAgent).browser;
 
 
 	$.event.key = function (browser, map) {
@@ -3543,7 +3595,7 @@ define(['jquery'], function($) {
 	});
 
 
-	jQuery.Event.prototype.keyName = function () {
+	$.Event.prototype.keyName = function () {
 		var event = this,
 			test = /\w/,
 			// It can be either keyCode or charCode.
@@ -3613,19 +3665,19 @@ define(['jquery'], function($) {
 		var handleObj = this.handleObj,
 			currentTarget = this.currentTarget;
 		// temporarily overwrite special handle
-		var origType = jQuery.event.special[handleObj.origType],
+		var origType = $.event.special[handleObj.origType],
 			origHandle = origType && origType.handle;
 
 		if (!origType) {
-			jQuery.event.special[handleObj.origType] = {};
+			$.event.special[handleObj.origType] = {};
 		}
-		jQuery.event.special[handleObj.origType].handle = function (ev) {
+		$.event.special[handleObj.origType].handle = function (ev) {
 			// remove this once we have passed the handleObj
 			if (ev.handleObj === handleObj && ev.currentTarget === currentTarget) {
 				if (!origType) {
-					delete jQuery.event.special[handleObj.origType];
+					delete $.event.special[handleObj.origType];
 				} else {
-					jQuery.event.special[handleObj.origType].handle = origHandle;
+					$.event.special[handleObj.origType].handle = origHandle;
 				}
 			}
 		}
@@ -3777,6 +3829,8 @@ define(['jquery'], function($) {
 			start = stop = undefined;
 		})
 	});
+
+})(this, jQuery);
 
 
 
