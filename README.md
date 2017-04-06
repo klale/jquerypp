@@ -1,0 +1,1 @@
+This is a fork of jquerypp 1.0.1 from https://github.com/bitovi/jquerypp by Bitovi
