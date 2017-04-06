@@ -3830,7 +3830,7 @@ define(['jquery'], function($) {
 		})
 	});
 
-})(this, jQuery);
+})(window, jQuery);
 
 
 
